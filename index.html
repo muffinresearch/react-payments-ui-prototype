@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <script src="build/react.js"></script>
+    <script src="build/jsxtransformer.js"></script>
+    <script src="js/classnames.js"></script>
+    <script src="js/card-validator.min.js"></script>
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 10px;
+      }
+      main {
+        margin: 0 auto;
+        max-width: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Credit card form prototype</h1>
+      <p>Just a small example of what doing forms looks like in react</p>
+      <div id="example"></div>
+    </main>
+
+    <script type="text/jsx">
+
+      var CardField = React.createClass({
+        getInitialState: function() {
+          return {value: ''};
+        },
+        validate: function(val) {
+          var numberValidation = cardValidator.number(val);
+          this.setProps({maybeValid: numberValidation.isPotentiallyValid,
+                         isValid: numberValidation.isValid});
+          this.setCardType(numberValidation.card);
+        },
+        cardTypeMap: {
+          'american-express': 'amex',
+          'diners-club': 'diners',
+          'master-card': 'mastercard',
+        },
+        setCardType: function(card) {
+          var className = card && card.type ? 'card-icon cctype-' + (this.cardTypeMap[card.type] || card.type) : '';
+          this.setProps({cardTypeClassName: className});
+        },
+        handleChange: function(event) {
+          var val = event.target.value;
+          this.setState({value: event.target.value});
+          this.validate(val);
+        },
+        render: function() {
+          var value = this.state.value;
+
+          var fieldClasses = classNames({
+            'valid': this.props.isValid,
+            'maybeValid': this.props.maybeValid,
+            'invalid': !this.props.isValid && !this.props.maybeValid,
+          });
+
+          var cardTypeClassName = this.props.cardTypeClassName;
+
+          return (
+            <label htmlFor="cc">
+              <span className={cardTypeClassName} />
+              <span className="vh">Card number</span>
+              <input className={fieldClasses} id="cc" type="tel" placeholder="Card number" onChange={this.handleChange} value={value} />
+            </label>
+          );
+        }
+      });
+
+      React.render(
+        <CardField isValid={false} maybeValid={true} />,
+        document.getElementById('example')
+      );
+
+    </script>
+  </body>
+</html>
