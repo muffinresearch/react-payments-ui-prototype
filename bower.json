@@ -1,0 +1,25 @@
+{
+  "name": "react-payments-ui-protoype",
+  "version": "0.0.1",
+  "homepage": "https://github.com/muffinresearch/react-payments-ui-prototype",
+  "authors": [
+    "Stuart Colville <scolville@mozilla.com>"
+  ],
+  "description": "Just a payment form prototype in react",
+  "keywords": [
+    "react",
+    "prototype",
+    "demo"
+  ],
+  "license": "MPL 2.0",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "react-maskedinput": "git@github.com:insin/react-maskedinput.git#~2.0.0"
+  }
+}
