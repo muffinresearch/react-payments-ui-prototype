@@ -3,7 +3,6 @@
   <head>
     <meta charset='utf-8'>
     <script src="build/react.js"></script>
-    <script src="build/JSXTransformer.js"></script>
     <script src="js/classnames.js"></script>
     <script src="js/card-validator.min.js"></script>
     <script src="js/react-maskedinput.min.js"></script>
@@ -21,13 +20,13 @@
   </head>
   <body>
     <main>
-      <h1>Credit card form prototype</h1>
+      <h1>Credit card form prototype (No JSX)</h1>
       <p>Just a small example of what doing forms looks like in react</p>
-      <p><a href="./no-jsx.html">See the non-JSX Version</a></p>
+      <p><a href="./index.html">See the JSX Version</a></p>
       <div id="example"></div>
     </main>
 
-    <script type="text/jsx">
+    <script type="text/javascript">
 
       var CardDetails = React.createClass({
 
@@ -87,20 +86,19 @@
               var cardClassName = card.type ? 'card-icon cctype-' + (that.cardTypeMap[card.type] || card.type) : '';
             }
 
-            fields.push(
-              <label htmlFor={field.id} key={field.id}>
-                <span className={cardClassName}></span>
-                <MaskedInput className={fieldClasses} id={field.id} pattern={field.pattern}
-                             placeholder={field.placeholder} onChange={that.handleChange.bind(that, index)} />
-              </label>
-            );
+            var cardSpan = React.createElement('span', {className: cardClassName});
+            var input = React.createElement(MaskedInput, {
+              className: fieldClasses,
+              id: field.id,
+              pattern: field.pattern,
+              placeholder: field.placeholder,
+              onChange: that.handleChange.bind(that, index),
+            });
+
+            fields.push(React.createElement('label', {htmlFor: field.id, key: field.id}, cardSpan, input));
           });
 
-          return (
-            <form>
-              {fields}
-            </form>
-          );
+          return React.createElement('form', null, fields);
         }
       });
 
@@ -125,10 +123,8 @@
         }
       ];
 
-      React.render(
-        <CardDetails fields={fields}/>,
-        document.getElementById('example')
-      );
+      var root = React.createElement(CardDetails, {fields: fields});
+      React.render(root, document.getElementById('example'));
 
     </script>
   </body>
