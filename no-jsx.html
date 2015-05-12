@@ -55,7 +55,6 @@
           var val = e.target.value;
           stateChange[e.target.id] = val;
           this.setState(stateChange);
-          this.validate(index, e);
         },
 
         // Just a convenience mapping for cards from card-validator
@@ -70,20 +69,22 @@
           var fields = [];
           var that = this;
           this.props.fields.map(function(field, index) {
-            // Set defaults for validity.
-            var isValid = field.isValid !== undefined ? field.isValid : false;
-            var maybeValid = field.maybeValid !== undefined ? field.maybeValid : true;
+            var val = that.state[field.id];
 
-            var fieldClasses = classNames({
-              'valid': isValid,
-              'maybeValid': maybeValid,
-              'invalid': !isValid && !maybeValid,
-            });
+            if (val) {
+              var valData = cardValidator[field.validator](that.state[field.id]);
+              var isValid = valData.isValid === true;
+              var maybeValid = valData.isPotentiallyValid !== undefined ? valData.isPotentiallyValid : true;
 
-            // Handle a card type if detected.
-            if (field.card) {
-              var card = field.card;
-              var cardClassName = card.type ? 'card-icon cctype-' + (that.cardTypeMap[card.type] || card.type) : '';
+              var fieldClasses = classNames({
+                'invalid': !isValid && !maybeValid,
+              });
+
+              // Handle a card type if detected.
+              if (valData.card) {
+                var card = valData.card;
+                var cardClassName = card.type ? 'card-icon cctype-' + (that.cardTypeMap[card.type] || card.type) : '';
+              }
             }
 
             var cardSpan = React.createElement('span', {className: cardClassName});
