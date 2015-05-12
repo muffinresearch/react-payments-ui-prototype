@@ -6,6 +6,7 @@
     <script src="build/JSXTransformer.js"></script>
     <script src="js/classnames.js"></script>
     <script src="js/card-validator.min.js"></script>
+    <script src="js/react-maskedinput.min.js"></script>
     <link rel="stylesheet" href="css/main.css">
     <style>
       body {
@@ -27,53 +28,104 @@
 
     <script type="text/jsx">
 
-      var CardField = React.createClass({
+      var CardDetails = React.createClass({
+
         getInitialState: function() {
-          return {value: ''};
+          return {
+            card: '',
+            expiration: '',
+            cvv: ''
+          };
         },
-        validate: function(val) {
-          var numberValidation = cardValidator.number(val);
-          this.setProps({maybeValid: numberValidation.isPotentiallyValid,
-                         isValid: numberValidation.isValid});
-          this.setCardType(numberValidation.card);
+
+        validate: function(index, e) {
+          var val = e.target.value;
+          var id = e.target.id;
+          // Make a copy of fields.
+          var newFields = this.props.fields.slice();
+          var valData = cardValidator[fields[index].validator](val);
+          newFields[index].isValid = valData.isValid;
+          newFields[index].maybeValid = valData.isPotentiallyValid;
+          newFields[index].card = valData.card,
+          this.setProps({fields: newFields});
         },
-        cardTypeMap: {
+
+        handleChange: function(index, e) {
+          var stateChange = {}
+          var val = e.target.value;
+          stateChange[e.target.id] = val;
+          this.setState(stateChange);
+          this.validate(index, e);
+        },
+
+        // Just a convenience mapping for cards from card-validator
+        // to shorted classes used in CSS.
+        cardTypeMap:  {
           'american-express': 'amex',
           'diners-club': 'diners',
           'master-card': 'mastercard',
         },
-        setCardType: function(card) {
-          var className = card && card.type ? 'card-icon cctype-' + (this.cardTypeMap[card.type] || card.type) : '';
-          this.setProps({cardTypeClassName: className});
-        },
-        handleChange: function(event) {
-          var val = event.target.value;
-          this.setState({value: event.target.value});
-          this.validate(val);
-        },
-        render: function() {
-          var value = this.state.value;
 
-          var fieldClasses = classNames({
-            'valid': this.props.isValid,
-            'maybeValid': this.props.maybeValid,
-            'invalid': !this.props.isValid && !this.props.maybeValid,
+        render: function() {
+          var fields = [];
+          var that = this;
+          this.props.fields.map(function(field, index) {
+            // Set defaults for validity.
+            var isValid = field.isValid !== undefined ? field.isValid : false;
+            var maybeValid = field.maybeValid !== undefined ? field.maybeValid : true;
+
+            var fieldClasses = classNames({
+              'valid': isValid,
+              'maybeValid': maybeValid,
+              'invalid': !isValid && !maybeValid,
+            });
+
+            // Handle a card type if detected.
+            if (field.card) {
+              var card = field.card;
+              var cardClassName = card.type ? 'card-icon cctype-' + (that.cardTypeMap[card.type] || card.type) : '';
+            }
+
+            fields.push(
+              <label htmlFor={field.id} key={field.id}>
+                <span className={cardClassName}></span>
+                <MaskedInput className={fieldClasses} id={field.id} pattern={field.pattern}
+                             placeholder={field.placeholder} onChange={that.handleChange.bind(that, index)} />
+              </label>
+            );
           });
 
-          var cardTypeClassName = this.props.cardTypeClassName;
-
           return (
-            <label htmlFor="cc">
-              <span className={cardTypeClassName} />
-              <span className="vh">Card number</span>
-              <input className={fieldClasses} id="cc" type="tel" placeholder="Card number" onChange={this.handleChange} value={value} />
-            </label>
+            <form>
+              {fields}
+            </form>
           );
         }
       });
 
+
+      // The core field props passed into <CardDetails>
+      var fields = [
+        {
+          placeholder: 'Credit Card',
+          pattern:  '1111 1111 1111 1111',
+          validator: 'number',
+          id: 'card',
+        }, {
+          placeholder: 'Expiry date',
+          pattern: '11/11',
+          validator: 'expirationDate',
+          id: 'expiration',
+        }, {
+          placeholder: 'CVV',
+          pattern: '111',
+          validator: 'cvv',
+          id: 'cvv',
+        }
+      ];
+
       React.render(
-        <CardField isValid={false} maybeValid={true} />,
+        <CardDetails fields={fields}/>,
         document.getElementById('example')
       );
 
