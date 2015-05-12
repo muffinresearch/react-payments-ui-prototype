@@ -39,24 +39,11 @@
           };
         },
 
-        validate: function(index, e) {
-          var val = e.target.value;
-          var id = e.target.id;
-          // Make a copy of fields.
-          var newFields = this.props.fields.slice();
-          var valData = cardValidator[fields[index].validator](val);
-          newFields[index].isValid = valData.isValid;
-          newFields[index].maybeValid = valData.isPotentiallyValid;
-          newFields[index].card = valData.card,
-          this.setProps({fields: newFields});
-        },
-
         handleChange: function(index, e) {
           var stateChange = {}
           var val = e.target.value;
           stateChange[e.target.id] = val;
           this.setState(stateChange);
-          this.validate(index, e);
         },
 
         // Just a convenience mapping for cards from card-validator
@@ -71,20 +58,23 @@
           var fields = [];
           var that = this;
           this.props.fields.map(function(field, index) {
-            // Set defaults for validity.
-            var isValid = field.isValid !== undefined ? field.isValid : false;
-            var maybeValid = field.maybeValid !== undefined ? field.maybeValid : true;
 
-            var fieldClasses = classNames({
-              'valid': isValid,
-              'maybeValid': maybeValid,
-              'invalid': !isValid && !maybeValid,
-            });
+            var val = that.state[field.id];
 
-            // Handle a card type if detected.
-            if (field.card) {
-              var card = field.card;
-              var cardClassName = card.type ? 'card-icon cctype-' + (that.cardTypeMap[card.type] || card.type) : '';
+            if (val) {
+              var valData = cardValidator[field.validator](that.state[field.id]);
+              var isValid = valData.isValid === true;
+              var maybeValid = valData.isPotentiallyValid !== undefined ? valData.isPotentiallyValid : true;
+
+              var fieldClasses = classNames({
+                'invalid': !isValid && !maybeValid,
+              });
+
+              // Handle a card type if detected.
+              if (valData.card) {
+                var card = valData.card;
+                var cardClassName = card.type ? 'card-icon cctype-' + (that.cardTypeMap[card.type] || card.type) : '';
+              }
             }
 
             fields.push(
