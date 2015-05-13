@@ -4,7 +4,6 @@
     <meta charset='utf-8'>
     <script src="build/react.js"></script>
     <script src="build/JSXTransformer.js"></script>
-    <script src="js/classnames.js"></script>
     <script src="js/card-validator.min.js"></script>
     <script src="js/react-maskedinput.min.js"></script>
     <link rel="stylesheet" href="css/main.css">
@@ -59,16 +58,13 @@
           var that = this;
           this.props.fields.map(function(field, index) {
 
+            // Validate the value
             var val = that.state[field.id];
-
             if (val) {
               var valData = cardValidator[field.validator](that.state[field.id]);
               var isValid = valData.isValid === true;
               var maybeValid = valData.isPotentiallyValid !== undefined ? valData.isPotentiallyValid : true;
-
-              var fieldClasses = classNames({
-                'invalid': !isValid && !maybeValid,
-              });
+              var fieldClass = !isValid && !maybeValid ? 'invalid' : null;
 
               // Handle a card type if detected.
               if (valData.card) {
@@ -79,8 +75,9 @@
 
             fields.push(
               <label htmlFor={field.id} key={field.id}>
-                <span className={cardClassName}></span>
-                <MaskedInput className={fieldClasses} id={field.id} pattern={field.pattern}
+                <span className="vh">{field.label ? field.label : field.placeholder}</span>
+                { cardClassName ? <span className={cardClassName}></span> : null }
+                <MaskedInput className={fieldClass} id={field.id} pattern={field.pattern}
                              placeholder={field.placeholder} onChange={that.handleChange.bind(that, index)} />
               </label>
             );
@@ -103,7 +100,8 @@
           validator: 'number',
           id: 'card',
         }, {
-          placeholder: 'Expiry date',
+          label: 'Expiry Date',
+          placeholder: 'MM/YY',
           pattern: '11/11',
           validator: 'expirationDate',
           id: 'expiration',
