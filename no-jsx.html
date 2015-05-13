@@ -3,7 +3,6 @@
   <head>
     <meta charset='utf-8'>
     <script src="build/react.js"></script>
-    <script src="js/classnames.js"></script>
     <script src="js/card-validator.min.js"></script>
     <script src="js/react-maskedinput.min.js"></script>
     <link rel="stylesheet" href="css/main.css">
@@ -38,18 +37,6 @@
           };
         },
 
-        validate: function(index, e) {
-          var val = e.target.value;
-          var id = e.target.id;
-          // Make a copy of fields.
-          var newFields = this.props.fields.slice();
-          var valData = cardValidator[fields[index].validator](val);
-          newFields[index].isValid = valData.isValid;
-          newFields[index].maybeValid = valData.isPotentiallyValid;
-          newFields[index].card = valData.card,
-          this.setProps({fields: newFields});
-        },
-
         handleChange: function(index, e) {
           var stateChange = {}
           var val = e.target.value;
@@ -75,10 +62,7 @@
               var valData = cardValidator[field.validator](that.state[field.id]);
               var isValid = valData.isValid === true;
               var maybeValid = valData.isPotentiallyValid !== undefined ? valData.isPotentiallyValid : true;
-
-              var fieldClasses = classNames({
-                'invalid': !isValid && !maybeValid,
-              });
+              var fieldClass = !isValid && !maybeValid ? 'invalid' : null;
 
               // Handle a card type if detected.
               if (valData.card) {
@@ -87,16 +71,17 @@
               }
             }
 
-            var cardSpan = React.createElement('span', {className: cardClassName});
+            var cardSpan = cardClassName ? React.createElement('span', {className: cardClassName}) : null;
+            var labelSpan = React.createElement('span', {className: 'vh'}, field.label ? field.label : field.placeholder);
             var input = React.createElement(MaskedInput, {
-              className: fieldClasses,
+              className: fieldClass,
               id: field.id,
               pattern: field.pattern,
               placeholder: field.placeholder,
               onChange: that.handleChange.bind(that, index),
             });
 
-            fields.push(React.createElement('label', {htmlFor: field.id, key: field.id}, cardSpan, input));
+            fields.push(React.createElement('label', {htmlFor: field.id, key: field.id}, labelSpan, cardSpan, input));
           });
 
           return React.createElement('form', null, fields);
@@ -107,20 +92,22 @@
       // The core field props passed into <CardDetails>
       var fields = [
         {
-          placeholder: 'Credit Card',
-          pattern:  '1111 1111 1111 1111',
-          validator: 'number',
           id: 'card',
+          pattern:  '1111 1111 1111 1111',
+          placeholder: 'Credit Card',
+          validator: 'number',
         }, {
-          placeholder: 'Expiry date',
-          pattern: '11/11',
-          validator: 'expirationDate',
+          classes: ['expiry'],
           id: 'expiration',
+          pattern: '11/11',
+          placeholder: 'MM/YY',
+          validator: 'expirationDate',
         }, {
-          placeholder: 'CVV',
-          pattern: '111',
-          validator: 'cvv',
+          classes: ['expiry'],
           id: 'cvv',
+          pattern: '111',
+          placeholder: 'CVV',
+          validator: 'cvv',
         }
       ];
 
