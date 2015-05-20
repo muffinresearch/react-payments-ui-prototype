@@ -4,6 +4,7 @@
   "description": "A demo of using react to do a validated credit card form field",
   "main": "index.js",
   "dependencies": {
+    "card-validator": "^2.0.1",
     "react": "^0.13.3"
   },
   "devDependencies": {
